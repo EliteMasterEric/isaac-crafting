@@ -19,9 +19,9 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="boi-crafting-calculator",  # Required
-    version="1.0.0",  # Required
-    author="wchill",  # Optional
-    author_email="w@chill.dev",  # Optional
+    version="1.1.0",  # Required
+    author="elitemastereric",  # Optional
+    author_email="elitemastereric@gmail.com",  # Optional
     classifiers=[  # Optional
         # How mature is this project? Common values are
         #   3 - Alpha

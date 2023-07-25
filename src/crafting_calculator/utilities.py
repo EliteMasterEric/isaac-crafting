@@ -14,7 +14,8 @@ GAME_VERSIONS = {
         "name": "PC",
         "versions": {
             "v1.7.7a": 2,
-            "v1.7.8a": 3
+            "v1.7.8a": 3,
+            "v1.7.9b": 3
         }
     }
 }

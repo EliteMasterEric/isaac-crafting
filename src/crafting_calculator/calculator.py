@@ -3,6 +3,7 @@ import itertools
 import math
 from concurrent.futures import ProcessPoolExecutor
 from typing import List, Tuple
+from functools import partial, update_wrapper
 
 from .isaac_rng import rng_next, string_to_seed
 from .isaac_item_pools import ItemPool
@@ -146,10 +147,12 @@ def find_items_for_pickups(
     )
     print(f"Calculating {total_recipe_count} recipes...")
 
+    get_result_b = update_wrapper(partial(get_result, platform, game_version), get_result)
+
     craftable_set = set()
     with ProcessPoolExecutor() as executor:
         results = executor.map(
-            get_result,
+            get_result_b,
             itertools.combinations_with_replacement(pickup_list, 8),
             itertools.repeat(seed),
             chunksize=32,
@@ -183,10 +186,12 @@ def find_recipes_for_item(
     )
     print(f"Calculating {total_recipe_count} recipes...")
 
+    get_result_b = update_wrapper(partial(get_result, platform, game_version), get_result)
+
     item_recipes = []
     with ProcessPoolExecutor() as executor:
         results = executor.map(
-            get_result,
+            get_result_b,
             itertools.combinations_with_replacement(pickup_list, 8),
             itertools.repeat(seed),
             chunksize=32,
