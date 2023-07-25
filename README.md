@@ -22,10 +22,12 @@ Perform the following steps to create a new version of the web app, which uses t
 
 ### Part 2. Python App Usage
 
-You can run the python app (which provides a CLI for the calculator) locally by moving into the `src` folder and running `python -m crafting_calculator`.
+You can run the python app (which provides a CLI for the calculator) locally by moving into the `src` folder and running `python -m crafting_calculator -h`.
 
 Alternatively, you can run `pip install .` in the root directory of the project, then run `calculate_bag -h`.
 
 ## Additional Notes
 
 - Item ID `64` is Steam Sale.
+- v1.7.9b of Repentence implemented Crafting Quality, which makes certain items (such as Steam Sale, A Quarter, and Box) act as though their item quality was higher than the standard values.
+- v1.7.9b of Repentence also enforces Item Tags, so for example Red Key cannot be crafted in Greed Mode, and only `offensive` items can be crafted as Tainted Lost. Use the newly added command line items to specify these flags.
