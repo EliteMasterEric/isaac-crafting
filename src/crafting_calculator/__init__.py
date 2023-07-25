@@ -5,9 +5,10 @@ from .calculator import (
     find_items_for_pickups,
     find_recipes_for_item,
     find_uncraftable_items,
-    find_item_id,
+    find_item_id
 )
 from .isaac_pickups import PICKUP_LIST
+from .config import config
 
 
 def main():
@@ -60,8 +61,58 @@ def main():
         action="store_true",
         help="Find all items that are uncraftable using this given set of pickups.",
     )
+    # Specify which tags to use
+    group.add_argument(
+        "--tag-greed-mode",
+        action="store_true",
+        help="Set to true if the player is in Greed Mode.",
+    )
+    group.add_argument(
+        "--tag-daily-run",
+        action="store_true",
+        help="Set to true if the player is in Daily challenge.",
+    )
+    group.add_argument(
+        "--tag-in-challenge",
+        action="store_true",
+        help="Set to true if the player is in a challenge.",
+    )
+    group.add_argument(
+        "--tag-lost-birthright",
+        action="store_true",
+        help="Set to true if the player has The Lost's Birthright.",
+    )
+    group.add_argument(
+        "--tag-keeper",
+        action="store_true",
+        help="Set to true if the player is playing as Keeper.",
+    )
+    group.add_argument(
+        "--tag-tainted-lost",
+        action="store_true",
+        help="Set to true if the player is playing as Tainted Lost.",
+    )
+    group.add_argument(
+        "--tag-sacred-orb",
+        action="store_true",
+        help="Set to true if the player has Sacred Orb.",
+    )
+    group.add_argument(
+        "--tag-trinket-no",
+        action="store_true",
+        help="Set to true if the player has Trinket NO!",
+    )
     args = parser.parse_args()
     platform, game_version = parse_game_version_string(args.game_version)
+
+    config["is_daily_run"] = True if args.tag_daily_run else False
+    config["is_greed_mode"] = True if args.tag_greed_mode else False
+    config["is_in_challenge"] = True if args.tag_in_challenge else False
+    config["has_lost_birthright"] = True if args.tag_lost_birthright else False
+    config["is_keeper"] = True if args.tag_keeper else False
+    config["is_tlost"] = True if args.tag_tainted_lost else False
+    config["has_sacred_orb"] = True if args.tag_sacred_orb else False
+    config["has_trinket_no"] = True if args.tag_trinket_no else False
 
     t0 = time.monotonic()
     if args.find_pickup_recipes:
