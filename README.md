@@ -1,11 +1,31 @@
 # Binding of Isaac Repentance - Bag of Crafting Calculator
 
-I took the calculator from platinumgod.co.uk and modified it to use the XML files from the Switch version of Repentance (v1.5). Quick and dirty copy and paste cause I didn't feel like rewriting from scratch while testing.
+This calculator is an updated version, modified from the ones provided by [wchill](https://github.com/wchill/bindingofisaac) and [PlatinumGod](https://platinumgod.co.uk).
 
-Also wrote a command-line Python version that's much easier to read; it reads from the XML and stringtable files directly so if/when new updates come out, you can just replace the files as needed. Might also work with mods on PC if the XML files are edited appropriately.
+## Build/Update Instructions
 
-Not sure if this works with other consoles yet.
+Perform the following steps to create a new version of the web app, which uses the latest data from the game:
 
-To run the modified platinumgod calculator, run `python3 server.py` in the web folder and then navigate to `http://localhost:8080`. You can also use whatever other method of serving the static files, such as this repo's github pages site.
+### Part 1. Extract Game Data
 
-To run the Python calculator, run `python3 crafting_calculator.py -h` in the src folder and read the help text. Alternatively, you can run `pip install .` in this folder and then run `calculate_bag -h`. Calculations for recipes is parallelized across all CPU cores.
+1. Navigate to your Isaac install folder.
+    - You can do this easily by opening your Steam Library, right clicking Isaac, and selecting Manage -> Browse Local Files
+2. Open the `tools/ResourceExtractor` folder and run the `ResourceExtractor.exe`.
+    - This will create several directories in the root Isaac folder, two directories up.
+3. Grab the following files.
+    - `resources-dlc3/itempools.xml`
+    - `resources-dlc3/items_metadata.xml`
+    - `resources-dlc3/items.xml`
+    - `resources-dlc3/recipes.xml`
+    - `resources/stringtable.sta`
+4. Place the above files in a new directory in the `src/crafting_calculator/gamedata/pc` folder.
+
+### Part 2. Python App Usage
+
+You can run the python app (which provides a CLI for the calculator) locally by moving into the `src` folder and running `python -m crafting_calculator`.
+
+Alternatively, you can run `pip install .` in the root directory of the project, then run `calculate_bag -h`.
+
+## Additional Notes
+
+- Item ID `64` is Steam Sale.
