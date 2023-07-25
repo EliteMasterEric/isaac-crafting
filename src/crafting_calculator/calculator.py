@@ -5,6 +5,7 @@ from concurrent.futures import ProcessPoolExecutor
 from typing import List, Tuple
 from functools import partial, update_wrapper
 
+from .config import config
 from .isaac_rng import rng_next, string_to_seed
 from .isaac_item_pools import ItemPool
 from .isaac_items import ItemListEntry
@@ -57,7 +58,7 @@ def get_result(
         for _ in range(pickup_count[pickup_id]):
             current_seed = rng_next(current_seed, pickup_id)
 
-    collectible_count = 733
+    collectible_count = 732
     collectible_list = [0.0] * collectible_count
     quality_min = 0
     quality_max = 4
@@ -77,26 +78,42 @@ def get_result(
         for min_score, quality_min, quality_max in reversed(quality_ranges):
             if score >= min_score:
                 break
-
+            
+        # We only add the items to the list if they are in the quality range
+        # Thus, -1 will never be added to the list
         for quality in range(quality_min, quality_max + 1):
             for item_id, item_weight in item_pool.quality_lists[quality]:
-                collectible_list[item_id] += pool_weight * item_weight
+                # Some items are skipped in the WEIGHTING step.
+                if is_item_available(items[item_id], True):
+                    collectible_list[item_id] += pool_weight * item_weight
 
     cumulative_weights = list(itertools.accumulate(collectible_list))
     all_weight = sum(collectible_list)
 
     for _ in range(20):
+        # Increment the RNG seed
         current_seed = rng_next(current_seed, 6)
+        # Number between 0 and total weight of all possible results
         remains = float(current_seed) * 2.3283062e-10 * all_weight
 
         if remains >= all_weight:
             break
 
+        # Find the first item in the list with a greater weight than the random number
         selected_item_id = bisect.bisect_right(cumulative_weights, remains)
+    
+        # Some items are skipped in the GENERATING step.
+        if not is_item_available(items[item_id], False):
+            continue
 
+        # Add the item to the list.
         item_config = items[selected_item_id]
         candidates.append(selected_item_id)
+
+        # If the item is not available in the current pool, or is tied to an achievement that isn't unlocked, Bag of Crafting will skip it.
+        # So if the item is tied to an achievement, we have to continue finding matches until we find one that isn't.
         if item_config.achievement_id is None:
+            # This item is not tied to an achievement, so we can stop here.
             return pickup_array, candidates, quality_sum
 
     # return breakfast if above fails
@@ -109,6 +126,37 @@ def print_progress(current: int, total: int):
     if current in when_to_print:
         print(f"{when_to_print[current]}% done")
 
+# 1.7.9 adds a new function to the game that checks if an item is available in the current pool.
+# This takes into whether the player is in Greed Mode, whether the player has The Lost's Birthright, etc.
+# and skips over items which are unavailable based on these conditions.
+def is_item_available(item: ItemListEntry, weight: bool) -> bool:
+    has_any_flags = config["is_daily_run"] or config["is_greed_mode"] or config["is_in_challenge"] or config["has_lost_birthright"] or config["is_keeper"] or config["is_tlost"]
+
+    if not has_any_flags:
+        return True
+
+    if weight:
+        if config["is_daily_run"] and item.has_tag("nodaily"):
+            return False
+        if config["is_greed_mode"] and item.has_tag("nogreed"):
+            return False
+        if config["is_in_challenge"] and item.has_tag("nochallenge"):
+            return False
+        if config["has_lost_birthright"] and item.has_tag("nolostbr"):
+            return False
+    else:
+        if config["is_keeper"] and item.has_tag("nokeeper"):
+            return False
+        if config["is_tlost"] and not item.has_tag("offensive"):
+            return False
+        # TODO: Tainted Lost has 20% reroll chance on Quality 2 or less
+        if config["has_sacred_orb"] and item.quality <= 1:
+            return False
+        # TODO: Sacred Orb has 33% reroll chance on Quality 2
+        if config["has_trinket_no"] and item.is_active:
+            return False
+
+    return True
 
 def find_item_id(platform: str, game_version: str, seed_string: str, pickup_list: List[int]) -> None:
     seed = string_to_seed(seed_string)
